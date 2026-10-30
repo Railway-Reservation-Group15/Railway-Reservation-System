@@ -63,15 +63,34 @@
       </ul>
     </section>
 
-    <section class="detail" id="search" aria-labelledby="search-heading">
-      <h2 id="search-heading">Search Trains</h2>
-      <p>Look up trains and see how many seats are left before you book.</p>
-      <ul class="steps">
-        <li><strong>Option 2</strong> searches by source and destination. Matching ignores capital letters and extra spaces.</li>
-        <li><strong>Option 3</strong> searches by train number.</li>
-        <li><strong>Option 4</strong> shows full train details with total, booked and available seats.</li>
-      </ul>
-      <p class="back"><a href="#top">Back to top</a></p>
+    <section class="search-section" id="search" aria-labelledby="search-heading">
+      <div class="search-intro">
+        <p class="eyebrow">Plan your journey</p>
+        <h2 id="search-heading">Find your train</h2>
+        <p>Compare routes, timings, fares and seats available.</p>
+      </div>
+      <form class="search-form" id="train-search">
+        <label>
+          <span>From</span>
+          <input id="source" name="source" type="text" list="station-list" placeholder="Departure station" autocomplete="off" required>
+        </label>
+        <label>
+          <span>To</span>
+          <input id="destination" name="destination" type="text" list="station-list" placeholder="Arrival station" autocomplete="off" required>
+        </label>
+        <datalist id="station-list">
+          <option value="Bengaluru"><option value="New Delhi"><option value="Chennai">
+          <option value="Mysuru"><option value="Hyderabad"><option value="Mumbai"><option value="Hubballi">
+        </datalist>
+        <button type="submit">Search trains</button>
+      </form>
+      <p class="data-note">Sample timetable and availability based on the project’s bundled train and booking records.</p>
+      <div class="results-heading">
+        <h3 id="results-title">Popular trains</h3>
+        <p id="results-summary" aria-live="polite">Showing trains from the current timetable</p>
+      </div>
+      <div class="results-list" id="train-results" aria-live="polite"></div>
+      <noscript><p class="search-message">Enable JavaScript to search the timetable.</p></noscript>
     </section>
 
     <section class="detail" id="book" aria-labelledby="book-heading">
@@ -116,5 +135,6 @@
   <footer class="site-footer">
     <p>Railway Ticket Reservation System &middot; Software Engineering Mini-Project, Group 15 &middot; PES University</p>
   </footer>
+  <script src="app.js" defer></script>
 </body>
 </html>

@@ -151,6 +151,207 @@ a {
   font-size: clamp(1.05rem, 2.2vw, 1.25rem);
 }
 
+/* ---------- Train search ---------- */
+
+.search-section {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: clamp(2.5rem, 7vw, 4.5rem) clamp(1rem, 4vw, 2.5rem) 1rem;
+}
+
+.search-intro {
+  margin-bottom: 1.5rem;
+}
+
+.search-intro .eyebrow {
+  margin-bottom: 0.35rem;
+  color: var(--amber-dark);
+}
+
+.search-intro h2 {
+  margin: 0;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  line-height: 1.2;
+}
+
+.search-intro > p:last-child {
+  margin: 0.5rem 0 0;
+  color: var(--ink-soft);
+}
+
+.search-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: #fff;
+  border: 1px solid #d9dee7;
+  border-radius: 0.65rem;
+  box-shadow: 0 4px 16px rgba(14, 26, 43, 0.06);
+}
+
+.search-form label {
+  display: grid;
+  gap: 0.4rem;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.search-form input {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #b8c1cf;
+  border-radius: 0.35rem;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 400;
+}
+
+.search-form input:focus {
+  border-color: var(--navy);
+}
+
+.search-form button {
+  min-height: 3rem;
+  padding: 0.7rem 1.2rem;
+  border: 0;
+  border-radius: 0.35rem;
+  background: var(--signal-red);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.search-form button:hover {
+  background: #a90d26;
+}
+
+.data-note {
+  margin: 0.65rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+}
+
+.results-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  margin: 2rem 0 0.85rem;
+}
+
+.results-heading h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.results-heading p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.results-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.train-result {
+  display: grid;
+  grid-template-columns: minmax(10rem, 1.2fr) minmax(12rem, 1.5fr) repeat(2, minmax(6rem, 0.65fr));
+  align-items: center;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem;
+  background: #fff;
+  border: 1px solid #d9dee7;
+  border-left: 4px solid var(--amber);
+  border-radius: 0.5rem;
+}
+
+.train-name,
+.train-number,
+.route-time,
+.result-label,
+.seat-count,
+.train-fare {
+  display: block;
+}
+
+.train-name {
+  font-weight: 700;
+}
+
+.train-number,
+.result-label {
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+}
+
+.route-time {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.route-stations {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.2rem;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+}
+
+.train-fare {
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.seat-count {
+  font-weight: 700;
+}
+
+.seat-count.sold-out {
+  color: var(--signal-red);
+}
+
+.search-message {
+  margin: 0;
+  padding: 1.25rem;
+  background: #fff;
+  border: 1px dashed #b8c1cf;
+  border-radius: 0.5rem;
+  color: var(--ink-soft);
+}
+
+@media (max-width: 50rem) {
+  .train-result {
+    grid-template-columns: 1fr 1.3fr;
+  }
+}
+
+@media (max-width: 38rem) {
+  .search-form {
+    grid-template-columns: 1fr;
+  }
+
+  .train-result {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+    padding: 1rem;
+  }
+
+  .route-details {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
 /* Departure-board style sample timetable */
 
 .board {
