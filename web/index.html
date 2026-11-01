@@ -3,15 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <title>Railway Ticket Reservation System</title>
-  <meta name="description" content="Railway Ticket Reservation System, Software Engineering mini-project by Group 15. Search trains, book and cancel tickets, and administrator login.">
+
+  <meta
+    name="description"
+    content="Railway Ticket Reservation System, Software Engineering mini-project by Group 15. Search trains, book and cancel tickets, and administrator login."
+  >
+
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
   <a class="skip-link" href="#main">Skip to main content</a>
 
+  <!-- Header and navigation -->
   <header class="site-header">
     <a class="brand" href="#top">Railway Reservation System</a>
+
     <nav aria-label="Main navigation">
       <ul class="nav-list">
         <li><a href="#search">Search Trains</a></li>
@@ -23,118 +32,380 @@
   </header>
 
   <main id="main">
+
+    <!-- Hero section -->
     <section class="hero" id="top" aria-labelledby="site-title">
-      <p class="eyebrow">Software Engineering Mini-Project &middot; Group 15</p>
+      <p class="eyebrow">
+        Software Engineering Mini-Project &middot; Group 15
+      </p>
+
       <h1 id="site-title">Railway Ticket Reservation System</h1>
-      <p class="lead">Search trains, check seat availability, book tickets, cancel reservations and manage train records, all from one menu-driven application.</p>
+
+      <p class="lead">
+        Search trains, check seat availability, book tickets, cancel
+        reservations and manage train records, all from one application.
+      </p>
     </section>
 
+    <!-- Main options -->
     <section class="options" aria-labelledby="options-heading">
       <h2 id="options-heading">What would you like to do?</h2>
+
       <ul class="ticket-grid">
         <li>
           <a class="ticket" href="#search">
             <span class="ticket-label">Passengers</span>
             <span class="ticket-title">Search Trains</span>
-            <span class="ticket-text">Find trains by route or train number and check seat availability.</span>
+            <span class="ticket-text">
+              Find trains by route or train number and check seat availability.
+            </span>
           </a>
         </li>
+
         <li>
           <a class="ticket" href="#book">
             <span class="ticket-label">Passengers</span>
             <span class="ticket-title">Book a Ticket</span>
-            <span class="ticket-text">Enter passenger details and receive a PNR, seat number and fare.</span>
+            <span class="ticket-text">
+              Enter passenger details and receive a PNR, seat number and fare.
+            </span>
           </a>
         </li>
+
         <li>
           <a class="ticket" href="#cancel">
             <span class="ticket-label">Passengers</span>
             <span class="ticket-title">Cancel a Ticket</span>
-            <span class="ticket-text">Cancel with your PNR and see the refund amount.</span>
+            <span class="ticket-text">
+              Cancel with your PNR and see the refund amount.
+            </span>
           </a>
         </li>
+
         <li>
           <a class="ticket" href="#admin">
             <span class="ticket-label">Staff</span>
             <span class="ticket-title">Admin Login</span>
-            <span class="ticket-text">Sign in to add, modify or delete trains and view bookings.</span>
+            <span class="ticket-text">
+              Sign in to add, modify or delete trains and view bookings.
+            </span>
           </a>
         </li>
       </ul>
     </section>
 
-    <section class="search-section" id="search" aria-labelledby="search-heading">
+    <!-- Train search -->
+    <section
+      class="search-section"
+      id="search"
+      aria-labelledby="search-heading"
+    >
       <div class="search-intro">
         <p class="eyebrow">Plan your journey</p>
+
         <h2 id="search-heading">Find your train</h2>
+
         <p>Compare routes, timings, fares and seats available.</p>
       </div>
+
       <form class="search-form" id="train-search">
         <label>
           <span>From</span>
-          <input id="source" name="source" type="text" list="station-list" placeholder="Departure station" autocomplete="off" required>
+
+          <input
+            id="source"
+            name="source"
+            type="text"
+            list="station-list"
+            placeholder="Departure station"
+            autocomplete="off"
+            required
+          >
         </label>
+
         <label>
           <span>To</span>
-          <input id="destination" name="destination" type="text" list="station-list" placeholder="Arrival station" autocomplete="off" required>
+
+          <input
+            id="destination"
+            name="destination"
+            type="text"
+            list="station-list"
+            placeholder="Arrival station"
+            autocomplete="off"
+            required
+          >
         </label>
+
         <datalist id="station-list">
-          <option value="Bengaluru"><option value="New Delhi"><option value="Chennai">
-          <option value="Mysuru"><option value="Hyderabad"><option value="Mumbai"><option value="Hubballi">
+          <option value="Bengaluru">
+          <option value="New Delhi">
+          <option value="Chennai">
+          <option value="Mysuru">
+          <option value="Hyderabad">
+          <option value="Mumbai">
+          <option value="Hubballi">
         </datalist>
+
         <button type="submit">Search trains</button>
       </form>
-      <p class="data-note">Sample timetable and availability based on the project’s bundled train and booking records.</p>
+
+      <p class="data-note">
+        Sample timetable and availability based on the project's bundled
+        train and booking records.
+      </p>
+
       <div class="results-heading">
         <h3 id="results-title">Popular trains</h3>
-        <p id="results-summary" aria-live="polite">Showing trains from the current timetable</p>
+
+        <p id="results-summary" aria-live="polite">
+          Showing trains from the current timetable
+        </p>
       </div>
-      <div class="results-list" id="train-results" aria-live="polite"></div>
-      <noscript><p class="search-message">Enable JavaScript to search the timetable.</p></noscript>
+
+      <div
+        class="results-list"
+        id="train-results"
+        aria-live="polite"
+      ></div>
+
+      <noscript>
+        <p class="search-message">
+          Enable JavaScript to search the timetable.
+        </p>
+      </noscript>
     </section>
 
-    <section class="detail" id="book" aria-labelledby="book-heading">
+    <!-- B18: Passenger booking interface -->
+    <section
+      class="detail"
+      id="book"
+      aria-labelledby="book-heading"
+    >
       <h2 id="book-heading">Book a Ticket</h2>
-      <p><strong>Option 5</strong> asks for these details, one prompt at a time:</p>
-      <ol class="steps">
-        <li>Train number</li>
-        <li>Passenger name</li>
-        <li>Passenger age</li>
-        <li>Gender (M, F or O)</li>
-        <li>Mobile number</li>
-      </ol>
-      <p>You receive a confirmation with a 10-digit PNR, your seat number and the fare. Keep the PNR: <strong>option 6</strong> shows the booking again at any time.</p>
-      <p class="back"><a href="#top">Back to top</a></p>
+
+      <p>
+        Enter your train and passenger details to book a railway ticket.
+      </p>
+
+      <form id="booking-form" class="booking-form">
+
+        <label for="booking-train-number">
+          <span>Train number</span>
+
+          <input
+            id="booking-train-number"
+            name="trainNo"
+            type="number"
+            min="1"
+            required
+            placeholder="Enter train number"
+            list="booking-train-list"
+          >
+          <datalist id="booking-train-list"></datalist>
+        </label>
+
+        <label for="passenger-name">
+          <span>Passenger name</span>
+
+          <input
+            id="passenger-name"
+            name="name"
+            type="text"
+            maxlength="50"
+            required
+            placeholder="Enter full name"
+          >
+        </label>
+
+        <label for="passenger-age">
+          <span>Passenger age</span>
+
+          <input
+            id="passenger-age"
+            name="age"
+            type="number"
+            min="1"
+            max="120"
+            required
+            placeholder="Enter age"
+          >
+        </label>
+
+        <label for="passenger-gender">
+          <span>Gender</span>
+
+          <select
+            id="passenger-gender"
+            name="gender"
+            required
+          >
+            <option value="">Select gender</option>
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+            <option value="O">Other</option>
+          </select>
+        </label>
+
+        <label for="passenger-contact">
+          <span>Mobile number</span>
+
+          <input
+            id="passenger-contact"
+            name="contact"
+            type="tel"
+            pattern="[6-9][0-9]{9}"
+            maxlength="10"
+            required
+            placeholder="10-digit mobile number"
+          >
+        </label>
+
+        <button type="submit">Book Ticket</button>
+      </form>
+
+      <!-- Displays errors or booking status -->
+      <div
+        id="booking-message"
+        aria-live="polite"
+      ></div>
+
+      <!-- B18: Booking confirmation -->
+      <section
+        id="booking-confirmation"
+        hidden
+        aria-labelledby="confirmation-heading"
+      >
+        <h3 id="confirmation-heading">Booking Confirmation</h3>
+
+        <p>
+          PNR:
+          <strong id="confirmation-pnr"></strong>
+        </p>
+
+        <p>
+          Train:
+          <strong id="confirmation-train"></strong>
+        </p>
+
+        <p>
+          Passenger:
+          <strong id="confirmation-passenger"></strong>
+        </p>
+
+        <p>
+          Age:
+          <strong id="confirmation-age"></strong>
+        </p>
+
+        <p>
+          Gender:
+          <strong id="confirmation-gender"></strong>
+        </p>
+
+        <p>
+          Contact:
+          <strong id="confirmation-contact"></strong>
+        </p>
+
+        <p>
+          Seat number:
+          <strong id="confirmation-seat"></strong>
+        </p>
+
+        <p>
+          Fare:
+          <strong id="confirmation-fare"></strong>
+        </p>
+
+        <p>
+          Booking date:
+          <strong id="confirmation-date"></strong>
+        </p>
+
+        <p>
+          Status:
+          <strong id="confirmation-status"></strong>
+        </p>
+      </section>
+
+      <p class="back">
+        <a href="#top">Back to top</a>
+      </p>
     </section>
 
-    <section class="detail" id="cancel" aria-labelledby="cancel-heading">
+    <!-- Cancel ticket -->
+    <section
+      class="detail"
+      id="cancel"
+      aria-labelledby="cancel-heading"
+    >
       <h2 id="cancel-heading">Cancel a Ticket</h2>
-      <p><strong>Option 7</strong> cancels a booking using its PNR. The seat is released for other passengers, and the original fare, the 10% cancellation charge and your refund are shown. A booking can only be cancelled once.</p>
-      <p class="back"><a href="#top">Back to top</a></p>
+
+      <p>
+        <strong>Option 7</strong> cancels a booking using its PNR.
+        The seat is released for other passengers, and the original fare,
+        the 10% cancellation charge and your refund are shown.
+        A booking can only be cancelled once.
+      </p>
+
+      <p class="back">
+        <a href="#top">Back to top</a>
+      </p>
     </section>
 
-    <section class="detail" id="admin" aria-labelledby="admin-heading">
+    <!-- Admin -->
+    <section
+      class="detail"
+      id="admin"
+      aria-labelledby="admin-heading"
+    >
       <h2 id="admin-heading">Admin Login</h2>
-      <p><strong>Option 8</strong> opens administrator login. Three failed attempts return you to the main menu. After signing in, an administrator can:</p>
+
+      <p>
+        <strong>Option 8</strong> opens administrator login.
+        Three failed attempts return you to the main menu.
+        After signing in, an administrator can:
+      </p>
+
       <ul class="steps">
         <li>Add and modify trains</li>
         <li>View all trains and all bookings</li>
         <li>Delete trains that have no confirmed bookings</li>
       </ul>
-      <p class="back"><a href="#top">Back to top</a></p>
+
+      <p class="back">
+        <a href="#top">Back to top</a>
+      </p>
     </section>
 
-    <section class="detail" id="start" aria-labelledby="start-heading">
+    <!-- Run instructions -->
+    <section
+      class="detail"
+      id="start"
+      aria-labelledby="start-heading"
+    >
       <h2 id="start-heading">Run the application</h2>
-      <p>The system is a C++17 console program. From the project folder:</p>
+
+      <p>
+        The system is a C++17 console program. From the project folder:
+      </p>
+
       <pre><code>g++ -std=c++17 -Iinclude src/*.cpp -o railway
 ./railway</code></pre>
     </section>
+
   </main>
 
+  <!-- Footer -->
   <footer class="site-footer">
-    <p>Railway Ticket Reservation System &middot; Software Engineering Mini-Project, Group 15 &middot; PES University</p>
+    <p>
+      Railway Ticket Reservation System &middot;
+      Software Engineering Mini-Project, Group 15 &middot;
+      PES University
+    </p>
   </footer>
+
   <script src="app.js" defer></script>
 </body>
 </html>

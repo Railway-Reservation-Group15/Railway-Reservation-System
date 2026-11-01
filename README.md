@@ -54,7 +54,8 @@ The Railway Reservation System follows a three-layer architecture defined in the
 ## Project Structure
 
 - `include/` — Header files, public interfaces, and shared data types.
-- `src/` — Module implementations and the application entry point.
+- `src/` — Module implementations and the console application entry point.
+- `server/` — Small HTTP server that exposes the existing C++ booking modules to the web interface.
 - `tests/` — Module-level testing documentation and future tests.
 - `.github/workflows/` — Automated build checks.
 
@@ -71,6 +72,34 @@ Run the setup application:
 ```bash
 ./railway
 ```
+
+## Web Booking Interface (B18)
+
+The web interface uses the same C++ booking modules and the same `trains.txt` and
+`bookings.txt` files as the console application. The HTTP server serves the web
+files and exposes these endpoints:
+
+- `GET /api/trains` — returns trains, fares, and current available seats.
+- `POST /api/bookings` — validates passenger details, creates a booking through
+  `BookingModule`, saves it to `bookings.txt`, and returns the generated PNR,
+  allocated seat, fare, and booking status.
+
+Build and start the web server from the project root (the directory containing
+`trains.txt` and `bookings.txt`):
+
+```bash
+g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude server/booking_server.cpp src/BookingModule.cpp src/FareModule.cpp src/FileModule.cpp src/TicketModule.cpp src/TrainModule.cpp src/ValidationModule.cpp -o booking_server
+./booking_server
+```
+
+Open **http://127.0.0.1:8080** in your browser. Keep the terminal running while
+using the website. Press `Ctrl+C` to stop the server. If port 8080 is occupied,
+start it on another port, for example `./booking_server 8081`.
+
+Bookings made through the website are real bookings in the project's local
+`bookings.txt` file. The available-seat count is refreshed from the C++ backend
+after each successful booking. Do not open `web/index.html` directly with
+`file://`; use the local server URL so the browser can reach the API.
 
 ## Administrator Access
 
