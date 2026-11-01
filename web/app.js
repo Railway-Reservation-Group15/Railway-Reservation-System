@@ -13,6 +13,7 @@ const trains = [
   { number: 17301, name: "Dharwad Express", from: "Bengaluru", to: "Hubballi", departure: "21:30", arrival: "07:00", fare: 430.00, seats: 5, booked: 5 }
 ];
 
+// Existing train search elements
 const form = document.querySelector("#train-search");
 const sourceInput = document.querySelector("#source");
 const destinationInput = document.querySelector("#destination");
@@ -20,55 +21,74 @@ const results = document.querySelector("#train-results");
 const resultsTitle = document.querySelector("#results-title");
 const resultsSummary = document.querySelector("#results-summary");
 
+// Create a train result card
 function createResult(train) {
   const available = Math.max(0, train.seats - train.booked);
   const card = document.createElement("article");
   card.className = "train-result";
 
   const identity = document.createElement("div");
+
   const name = document.createElement("span");
   name.className = "train-name";
   name.textContent = train.name;
+
   const number = document.createElement("span");
   number.className = "train-number";
   number.textContent = `Train ${train.number}`;
+
   identity.append(name, number);
 
   const route = document.createElement("div");
   route.className = "route-details";
+
   const times = document.createElement("span");
   times.className = "route-time";
   times.textContent = `${train.departure}  →  ${train.arrival}`;
+
   const stations = document.createElement("span");
   stations.className = "route-stations";
   stations.textContent = `${train.from}  →  ${train.to}`;
+
   route.append(times, stations);
 
   const fare = document.createElement("div");
+
   const fareLabel = document.createElement("span");
   fareLabel.className = "result-label";
   fareLabel.textContent = "Fare";
+
   const fareValue = document.createElement("span");
   fareValue.className = "train-fare";
-  fareValue.textContent = `₹${train.fare.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
+  fareValue.textContent = `₹${train.fare.toLocaleString("en-IN", {
+    minimumFractionDigits: 2
+  })}`;
+
   fare.append(fareLabel, fareValue);
 
   const availability = document.createElement("div");
+
   const seatLabel = document.createElement("span");
   seatLabel.className = "result-label";
   seatLabel.textContent = "Seats available";
+
   const seatValue = document.createElement("span");
   seatValue.className = `seat-count${available === 0 ? " sold-out" : ""}`;
   seatValue.textContent = available === 0 ? "Sold out" : String(available);
+
   availability.append(seatLabel, seatValue);
 
   card.append(identity, route, fare, availability);
+
   return card;
 }
 
+// Display train search results
 function showTrains(matches, searching) {
   results.replaceChildren();
+
   resultsTitle.textContent = searching ? "Search results" : "Popular trains";
+
   resultsSummary.textContent = searching
     ? `${matches.length} ${matches.length === 1 ? "train" : "trains"} found`
     : "Showing trains from the current timetable";
@@ -76,7 +96,9 @@ function showTrains(matches, searching) {
   if (matches.length === 0) {
     const message = document.createElement("p");
     message.className = "search-message";
-    message.textContent = "No trains found for that route. Check the station names and try again.";
+    message.textContent =
+      "No trains found for that route. Check the station names and try again.";
+
     results.append(message);
     return;
   }
@@ -84,15 +106,84 @@ function showTrains(matches, searching) {
   results.append(...matches.map(createResult));
 }
 
+// Existing train search functionality
 form.addEventListener("submit", (event) => {
   event.preventDefault();
+
   const source = sourceInput.value.trim().toLocaleLowerCase();
   const destination = destinationInput.value.trim().toLocaleLowerCase();
+
   const matches = trains.filter((train) =>
     train.from.toLocaleLowerCase() === source &&
     train.to.toLocaleLowerCase() === destination
   );
+
   showTrains(matches, true);
 });
 
+// Display popular trains initially
 showTrains(trains, false);
+
+
+// =====================================================
+// B18: Passenger Booking Interface
+// =====================================================
+
+const bookingForm = document.querySelector("#booking-form");
+const bookingMessage = document.querySelector("#booking-message");
+const bookingConfirmation = document.querySelector("#booking-confirmation");
+
+// Handle passenger booking form submission
+bookingForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const trainNo = Number(
+    document.querySelector("#booking-train-number").value
+  );
+
+  const name = document.querySelector("#passenger-name").value.trim();
+
+  const age = Number(
+    document.querySelector("#passenger-age").value
+  );
+
+  const gender = document.querySelector("#passenger-gender").value;
+
+  const contact = document.querySelector("#passenger-contact").value.trim();
+
+  const train = trains.find((item) => item.number === trainNo);
+
+  // Hide any previous confirmation
+  bookingConfirmation.hidden = true;
+
+  // Validate train number
+  if (!train) {
+    bookingMessage.textContent = "Please enter a valid train number.";
+    return;
+  }
+
+  // Validate passenger name and age
+  if (!name || !Number.isInteger(age) || age < 1 || age > 120) {
+    bookingMessage.textContent =
+      "Please enter a valid passenger name and age.";
+    return;
+  }
+
+  // Validate gender
+  if (!["M", "F", "O"].includes(gender)) {
+    bookingMessage.textContent = "Please select a valid gender.";
+    return;
+  }
+
+  // Validate contact number
+  if (!/^\d{10}$/.test(contact)) {
+    bookingMessage.textContent =
+      "Please enter a valid 10-digit contact number.";
+    return;
+  }
+
+  // Passenger details are valid.
+  // Actual booking confirmation requires connection to the C++ BookingModule.
+  bookingMessage.textContent =
+    "Passenger details validated. Booking confirmation will be available once connected to the booking system.";
+});
