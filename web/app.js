@@ -2,6 +2,7 @@
 // Train data and booking actions are served by the C++ backend.
 
 let trains = [];
+let currentCancellationBooking = null;
 
 // Train search elements
 const searchForm = document.querySelector("#train-search");
@@ -19,11 +20,34 @@ const bookingSubmitButton = bookingForm.querySelector('button[type="submit"]');
 const trainNumberInput = document.querySelector("#booking-train-number");
 const trainNumberList = document.querySelector("#booking-train-list");
 
+// Cancellation elements
+const cancellationLookupForm = document.querySelector("#cancellation-lookup-form");
+const cancellationPnrInput = document.querySelector("#cancel-pnr");
+const cancellationMessage = document.querySelector("#cancellation-message");
+const cancellationDetails = document.querySelector("#cancellation-details");
+const confirmCancellationButton = document.querySelector("#confirm-cancellation-button");
+const cancellationResult = document.querySelector("#cancellation-result");
+
 function formatFare(amount) {
   return `₹${Number(amount).toLocaleString("en-IN", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   })}`;
+}
+
+async function readApiResponse(response, defaultMessage) {
+  let data;
+  try {
+    data = await response.json();
+  } catch (error) {
+    throw new Error(defaultMessage);
+  }
+
+  if (!response.ok || data.success === false) {
+    throw new Error(data.message || defaultMessage);
+  }
+
+  return data;
 }
 
 function createResult(train) {
@@ -111,9 +135,9 @@ function populateTrainChoices() {
 async function loadTrains(showError = true) {
   try {
     const response = await fetch("/api/trains");
-    const data = await response.json();
-    if (!response.ok || !data.success || !Array.isArray(data.trains)) {
-      throw new Error(data.message || "Could not load train records.");
+    const data = await readApiResponse(response, "Could not load train records.");
+    if (!Array.isArray(data.trains)) {
+      throw new Error("The server returned invalid train data.");
     }
 
     trains = data.trains;
@@ -213,9 +237,9 @@ bookingForm.addEventListener("submit", async (event) => {
       body: JSON.stringify(payload)
     });
 
-    const data = await response.json();
-    if (!response.ok || !data.success || !data.booking) {
-      throw new Error(data.message || "Booking could not be completed.");
+    const data = await readApiResponse(response, "Booking could not be completed.");
+    if (!data.booking) {
+      throw new Error("The server did not return the new booking details.");
     }
 
     displayBooking(data.booking);
@@ -230,6 +254,148 @@ bookingForm.addEventListener("submit", async (event) => {
     bookingSubmitButton.disabled = false;
     bookingSubmitButton.textContent = "Book Ticket";
   }
+});
+
+function displayCancellationBooking(booking) {
+  document.querySelector("#cancel-booking-pnr").textContent = booking.pnr;
+  document.querySelector("#cancel-booking-passenger").textContent = booking.passenger.name;
+  document.querySelector("#cancel-booking-train").textContent =
+    `${booking.trainNo} - ${booking.trainName}`;
+  document.querySelector("#cancel-booking-route").textContent =
+    `${booking.source} → ${booking.destination} (${booking.departure}–${booking.arrival})`;
+  document.querySelector("#cancel-booking-seat").textContent = String(booking.seatNo);
+  document.querySelector("#cancel-booking-date").textContent = booking.bookingDate;
+  document.querySelector("#cancel-booking-fare").textContent = formatFare(booking.fare);
+  document.querySelector("#cancel-booking-status").textContent = booking.status;
+
+  const isConfirmed = String(booking.status).toUpperCase() === "CONFIRMED";
+  confirmCancellationButton.disabled = !isConfirmed;
+  confirmCancellationButton.textContent = isConfirmed
+    ? "Confirm Cancellation"
+    : "Booking Cannot Be Cancelled";
+
+  if (!isConfirmed) {
+    cancellationMessage.textContent =
+      String(booking.status).toUpperCase() === "CANCELLED"
+        ? "This booking has already been cancelled."
+        : "Only confirmed bookings can be cancelled.";
+  }
+
+  cancellationDetails.hidden = false;
+  cancellationDetails.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function displayCancellationResult(booking) {
+  const fare = Number(booking.fare);
+  const refund = Number(booking.refund);
+  const charge = Number.isFinite(Number(booking.cancellationCharge))
+    ? Number(booking.cancellationCharge)
+    : fare - refund;
+
+  document.querySelector("#cancel-result-pnr").textContent = booking.pnr;
+  document.querySelector("#cancel-result-fare").textContent = formatFare(fare);
+  document.querySelector("#cancel-result-charge").textContent = formatFare(charge);
+  document.querySelector("#cancel-result-refund").textContent = formatFare(refund);
+  document.querySelector("#cancel-result-status").textContent =
+    "Cancellation completed successfully. The seat has been released.";
+
+  cancellationResult.hidden = false;
+  cancellationResult.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+// Look up the booking first so the passenger can review its details.
+cancellationLookupForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  cancellationMessage.textContent = "";
+  cancellationDetails.hidden = true;
+  cancellationResult.hidden = true;
+  confirmCancellationButton.disabled = true;
+  currentCancellationBooking = null;
+
+  const pnr = cancellationPnrInput.value.trim();
+  if (!/^[0-9]{10}$/.test(pnr)) {
+    cancellationMessage.textContent = "Enter a valid 10-digit PNR.";
+    return;
+  }
+
+  const lookupButton = cancellationLookupForm.querySelector('button[type="submit"]');
+  lookupButton.disabled = true;
+  lookupButton.textContent = "Searching...";
+  cancellationMessage.textContent = "Retrieving booking details...";
+
+  try {
+    const response = await fetch(`/api/bookings/${encodeURIComponent(pnr)}`);
+    const data = await readApiResponse(response, "Could not retrieve this booking.");
+    if (!data.booking) {
+      throw new Error("The server did not return booking details.");
+    }
+
+    currentCancellationBooking = data.booking;
+    cancellationMessage.textContent = "Booking found. Review the details before cancelling.";
+    displayCancellationBooking(data.booking);
+  } catch (error) {
+    cancellationMessage.textContent = error.message ||
+      "Could not retrieve the booking. Check the PNR and try again.";
+    console.error("Booking lookup failed:", error);
+  } finally {
+    lookupButton.disabled = false;
+    lookupButton.textContent = "Find Booking";
+  }
+});
+
+// Cancel only after the booking details have been found and reviewed.
+confirmCancellationButton.addEventListener("click", async () => {
+  if (!currentCancellationBooking ||
+      String(currentCancellationBooking.status).toUpperCase() !== "CONFIRMED") {
+    cancellationMessage.textContent = "Find a confirmed booking before cancelling it.";
+    return;
+  }
+
+  const pnr = currentCancellationBooking.pnr;
+  const confirmed = window.confirm(
+    `Are you sure you want to cancel ticket ${pnr}? The refund will be 90% of the stored fare.`
+  );
+  if (!confirmed) return;
+
+  confirmCancellationButton.disabled = true;
+  confirmCancellationButton.textContent = "Cancelling...";
+  cancellationMessage.textContent = "Sending cancellation request...";
+  cancellationResult.hidden = true;
+
+  try {
+    const response = await fetch("/api/bookings/cancel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pnr })
+    });
+
+    const data = await readApiResponse(response, "The booking could not be cancelled.");
+    if (!data.booking) {
+      throw new Error("The server did not return the updated booking details.");
+    }
+
+    currentCancellationBooking = data.booking;
+    displayCancellationBooking(data.booking);
+    cancellationMessage.textContent = data.message || "Booking cancelled successfully.";
+    displayCancellationResult(data.booking);
+    await loadTrains(false);
+  } catch (error) {
+    cancellationMessage.textContent = error.message ||
+      "Could not complete cancellation. Please try again.";
+    console.error("Cancellation request failed:", error);
+    confirmCancellationButton.disabled = false;
+    confirmCancellationButton.textContent = "Confirm Cancellation";
+  }
+});
+
+// Clear an old preview when the user starts entering a different PNR.
+cancellationPnrInput.addEventListener("input", () => {
+  currentCancellationBooking = null;
+  cancellationDetails.hidden = true;
+  cancellationResult.hidden = true;
+  cancellationMessage.textContent = "";
+  confirmCancellationButton.disabled = true;
+  confirmCancellationButton.textContent = "Confirm Cancellation";
 });
 
 // Load authoritative train and seat data as soon as the page opens.
