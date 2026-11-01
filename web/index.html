@@ -3,24 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <title>Railway Ticket Reservation System</title>
-
   <meta
     name="description"
     content="Railway Ticket Reservation System, Software Engineering mini-project by Group 15. Search trains, book and cancel tickets, and administrator login."
   >
-
   <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
   <a class="skip-link" href="#main">Skip to main content</a>
-
   <!-- Header and navigation -->
   <header class="site-header">
     <a class="brand" href="#top">Railway Reservation System</a>
-
     <nav aria-label="Main navigation">
       <ul class="nav-list">
         <li><a href="#search">Search Trains</a></li>
@@ -30,27 +24,21 @@
       </ul>
     </nav>
   </header>
-
   <main id="main">
-
     <!-- Hero section -->
     <section class="hero" id="top" aria-labelledby="site-title">
       <p class="eyebrow">
         Software Engineering Mini-Project &middot; Group 15
       </p>
-
       <h1 id="site-title">Railway Ticket Reservation System</h1>
-
       <p class="lead">
         Search trains, check seat availability, book tickets, cancel
         reservations and manage train records, all from one application.
       </p>
     </section>
-
     <!-- Main options -->
     <section class="options" aria-labelledby="options-heading">
       <h2 id="options-heading">What would you like to do?</h2>
-
       <ul class="ticket-grid">
         <li>
           <a class="ticket" href="#search">
@@ -61,7 +49,6 @@
             </span>
           </a>
         </li>
-
         <li>
           <a class="ticket" href="#book">
             <span class="ticket-label">Passengers</span>
@@ -71,7 +58,6 @@
             </span>
           </a>
         </li>
-
         <li>
           <a class="ticket" href="#cancel">
             <span class="ticket-label">Passengers</span>
@@ -81,7 +67,6 @@
             </span>
           </a>
         </li>
-
         <li>
           <a class="ticket" href="#admin">
             <span class="ticket-label">Staff</span>
@@ -93,7 +78,6 @@
         </li>
       </ul>
     </section>
-
     <!-- Train search -->
     <section
       class="search-section"
@@ -102,16 +86,12 @@
     >
       <div class="search-intro">
         <p class="eyebrow">Plan your journey</p>
-
         <h2 id="search-heading">Find your train</h2>
-
         <p>Compare routes, timings, fares and seats available.</p>
       </div>
-
       <form class="search-form" id="train-search">
         <label>
           <span>From</span>
-
           <input
             id="source"
             name="source"
@@ -122,10 +102,8 @@
             required
           >
         </label>
-
         <label>
           <span>To</span>
-
           <input
             id="destination"
             name="destination"
@@ -136,7 +114,6 @@
             required
           >
         </label>
-
         <datalist id="station-list">
           <option value="Bengaluru">
           <option value="New Delhi">
@@ -146,36 +123,29 @@
           <option value="Mumbai">
           <option value="Hubballi">
         </datalist>
-
         <button type="submit">Search trains</button>
       </form>
-
       <p class="data-note">
         Sample timetable and availability based on the project's bundled
         train and booking records.
       </p>
-
       <div class="results-heading">
         <h3 id="results-title">Popular trains</h3>
-
         <p id="results-summary" aria-live="polite">
           Showing trains from the current timetable
         </p>
       </div>
-
       <div
         class="results-list"
         id="train-results"
         aria-live="polite"
       ></div>
-
       <noscript>
         <p class="search-message">
           Enable JavaScript to search the timetable.
         </p>
       </noscript>
     </section>
-
     <!-- B18: Passenger booking interface -->
     <section
       class="detail"
@@ -183,16 +153,12 @@
       aria-labelledby="book-heading"
     >
       <h2 id="book-heading">Book a Ticket</h2>
-
       <p>
         Enter your train and passenger details to book a railway ticket.
       </p>
-
       <form id="booking-form" class="booking-form">
-
         <label for="booking-train-number">
           <span>Train number</span>
-
           <input
             id="booking-train-number"
             name="trainNo"
@@ -204,10 +170,8 @@
           >
           <datalist id="booking-train-list"></datalist>
         </label>
-
         <label for="passenger-name">
           <span>Passenger name</span>
-
           <input
             id="passenger-name"
             name="name"
@@ -217,10 +181,8 @@
             placeholder="Enter full name"
           >
         </label>
-
         <label for="passenger-age">
           <span>Passenger age</span>
-
           <input
             id="passenger-age"
             name="age"
@@ -231,10 +193,8 @@
             placeholder="Enter age"
           >
         </label>
-
         <label for="passenger-gender">
           <span>Gender</span>
-
           <select
             id="passenger-gender"
             name="gender"
@@ -246,10 +206,8 @@
             <option value="O">Other</option>
           </select>
         </label>
-
         <label for="passenger-contact">
           <span>Mobile number</span>
-
           <input
             id="passenger-contact"
             name="contact"
@@ -260,16 +218,13 @@
             placeholder="10-digit mobile number"
           >
         </label>
-
         <button type="submit">Book Ticket</button>
       </form>
-
       <!-- Displays errors or booking status -->
       <div
         id="booking-message"
         aria-live="polite"
       ></div>
-
       <!-- B18: Booking confirmation -->
       <section
         id="booking-confirmation"
@@ -277,63 +232,51 @@
         aria-labelledby="confirmation-heading"
       >
         <h3 id="confirmation-heading">Booking Confirmation</h3>
-
         <p>
           PNR:
           <strong id="confirmation-pnr"></strong>
         </p>
-
         <p>
           Train:
           <strong id="confirmation-train"></strong>
         </p>
-
         <p>
           Passenger:
           <strong id="confirmation-passenger"></strong>
         </p>
-
         <p>
           Age:
           <strong id="confirmation-age"></strong>
         </p>
-
         <p>
           Gender:
           <strong id="confirmation-gender"></strong>
         </p>
-
         <p>
           Contact:
           <strong id="confirmation-contact"></strong>
         </p>
-
         <p>
           Seat number:
           <strong id="confirmation-seat"></strong>
         </p>
-
         <p>
           Fare:
           <strong id="confirmation-fare"></strong>
         </p>
-
         <p>
           Booking date:
           <strong id="confirmation-date"></strong>
         </p>
-
         <p>
           Status:
           <strong id="confirmation-status"></strong>
         </p>
       </section>
-
       <p class="back">
         <a href="#top">Back to top</a>
       </p>
     </section>
-
     <!-- Cancel ticket -->
     <section
       class="detail"
@@ -341,19 +284,108 @@
       aria-labelledby="cancel-heading"
     >
       <h2 id="cancel-heading">Cancel a Ticket</h2>
-
       <p>
-        <strong>Option 7</strong> cancels a booking using its PNR.
-        The seat is released for other passengers, and the original fare,
-        the 10% cancellation charge and your refund are shown.
-        A booking can only be cancelled once.
+        Enter your PNR to retrieve your booking details. Review the details
+        before confirming cancellation. After a successful cancellation,
+        the seat is released and the refund amount is displayed. The refund
+        is 90% of the original stored fare.
       </p>
 
+      <form id="cancellation-lookup-form" class="action-form">
+        <label for="cancel-pnr">PNR (10 digits)</label>
+        <input
+          id="cancel-pnr"
+          name="pnr"
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]{10}"
+          minlength="10"
+          maxlength="10"
+          autocomplete="off"
+          placeholder="Enter your 10-digit PNR"
+          required
+        >
+        <button id="lookup-booking-button" type="submit">Find Booking</button>
+      </form>
+
+      <p
+        id="cancellation-message"
+        class="form-message"
+        role="status"
+        aria-live="polite"
+      ></p>
+
+      <section
+        id="cancellation-details"
+        class="booking-preview"
+        hidden
+        aria-labelledby="cancellation-details-heading"
+      >
+        <h3 id="cancellation-details-heading">Booking Details</h3>
+
+        <dl class="detail-list">
+          <div>
+            <dt>PNR</dt>
+            <dd id="cancel-booking-pnr"></dd>
+          </div>
+          <div>
+            <dt>Passenger</dt>
+            <dd id="cancel-booking-passenger"></dd>
+          </div>
+          <div>
+            <dt>Train</dt>
+            <dd id="cancel-booking-train"></dd>
+          </div>
+          <div>
+            <dt>Route</dt>
+            <dd id="cancel-booking-route"></dd>
+          </div>
+          <div>
+            <dt>Seat number</dt>
+            <dd id="cancel-booking-seat"></dd>
+          </div>
+          <div>
+            <dt>Booking date</dt>
+            <dd id="cancel-booking-date"></dd>
+          </div>
+          <div>
+            <dt>Original fare</dt>
+            <dd id="cancel-booking-fare"></dd>
+          </div>
+          <div>
+            <dt>Status</dt>
+            <dd id="cancel-booking-status"></dd>
+          </div>
+        </dl>
+
+        <p>Please check these details before cancelling the ticket.</p>
+        <button
+          id="confirm-cancellation-button"
+          class="action-button"
+          type="button"
+          disabled
+        >
+          Confirm Cancellation
+        </button>
+      </section>
+
+      <section
+        id="cancellation-result"
+        class="booking-preview"
+        hidden
+        aria-labelledby="cancellation-result-heading"
+      >
+        <h3 id="cancellation-result-heading">Cancellation Summary</h3>
+        <p>PNR: <strong id="cancel-result-pnr"></strong></p>
+        <p>Original fare: <strong id="cancel-result-fare"></strong></p>
+        <p>Cancellation charge (10%): <strong id="cancel-result-charge"></strong></p>
+        <p>Refund amount (90%): <strong id="cancel-result-refund"></strong></p>
+        <p id="cancel-result-status" role="status"></p>
+      </section>
       <p class="back">
         <a href="#top">Back to top</a>
       </p>
     </section>
-
     <!-- Admin -->
     <section
       class="detail"
@@ -361,24 +393,63 @@
       aria-labelledby="admin-heading"
     >
       <h2 id="admin-heading">Admin Login</h2>
-
       <p>
-        <strong>Option 8</strong> opens administrator login.
-        Three failed attempts return you to the main menu.
-        After signing in, an administrator can:
+        Sign in with your administrator credentials to access protected
+        railway management functions. Administrative actions are available
+        only after successful authentication.
       </p>
 
-      <ul class="steps">
-        <li>Add and modify trains</li>
-        <li>View all trains and all bookings</li>
-        <li>Delete trains that have no confirmed bookings</li>
-      </ul>
+      <form id="admin-login-form" class="action-form">
+        <label for="admin-username">Username</label>
+        <input
+          id="admin-username"
+          name="username"
+          type="text"
+          autocomplete="username"
+          placeholder="Enter administrator username"
+          required
+        >
 
+        <label for="admin-password">Password</label>
+        <input
+          id="admin-password"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          placeholder="Enter administrator password"
+          required
+        >
+
+        <button id="admin-login-button" type="submit">Login</button>
+      </form>
+
+      <p
+        id="admin-message"
+        class="form-message"
+        role="status"
+        aria-live="polite"
+      ></p>
+
+      <section
+        id="admin-session"
+        class="booking-preview"
+        hidden
+        aria-labelledby="admin-session-heading"
+      >
+        <h3 id="admin-session-heading">Administrator Access</h3>
+        <p id="admin-session-message">You are logged in as an administrator.</p>
+        <button
+          id="admin-logout-button"
+          class="action-button"
+          type="button"
+        >
+          Logout
+        </button>
+      </section>
       <p class="back">
         <a href="#top">Back to top</a>
       </p>
     </section>
-
     <!-- Run instructions -->
     <section
       class="detail"
@@ -386,17 +457,13 @@
       aria-labelledby="start-heading"
     >
       <h2 id="start-heading">Run the application</h2>
-
       <p>
         The system is a C++17 console program. From the project folder:
       </p>
-
       <pre><code>g++ -std=c++17 -Iinclude src/*.cpp -o railway
 ./railway</code></pre>
     </section>
-
   </main>
-
   <!-- Footer -->
   <footer class="site-footer">
     <p>
@@ -405,7 +472,6 @@
       PES University
     </p>
   </footer>
-
   <script src="app.js" defer></script>
 </body>
 </html>

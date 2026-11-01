@@ -667,3 +667,112 @@ main {
     grid-template-columns: 1fr;
   }
 }
+/* ---------- B19: Cancellation and admin forms ---------- */
+
+.action-form {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  max-width: 32rem;
+}
+
+.action-form label {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.action-form input {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #b8c1cf;
+  border-radius: 0.35rem;
+  font: inherit;
+}
+
+.action-form input:focus {
+  border-color: var(--navy);
+  outline: 2px solid transparent;
+}
+
+.action-form button,
+.action-button {
+  min-height: 3rem;
+  padding: 0.7rem 1.2rem;
+  border: 0;
+  border-radius: 0.35rem;
+  background: var(--signal-red);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.action-form button:hover,
+.action-button:hover {
+  background: #a90d26;
+}
+
+.action-form button:disabled,
+.action-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.form-message {
+  min-height: 1.5rem;
+  margin-top: 0.75rem;
+  color: var(--ink-soft);
+}
+
+.booking-preview {
+  margin-top: 1.25rem;
+  padding: 1.25rem;
+  border: 1px solid #d8dee8;
+  border-radius: 0.5rem;
+  background: #fff;
+}
+
+.booking-preview h3 {
+  margin-top: 0;
+}
+
+.detail-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.detail-list div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.detail-list dt {
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.detail-list dd {
+  margin: 0;
+  text-align: right;
+}
+
+#cancellation-details[hidden],
+#admin-session[hidden] {
+  display: none;
+}
+
+@media (max-width: 38rem) {
+  .detail-list div {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .detail-list dd {
+    text-align: left;
+  }
+}
