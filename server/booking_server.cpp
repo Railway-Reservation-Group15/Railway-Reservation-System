@@ -1,3 +1,4 @@
+#include "AdminModule.h"
 #include "BookingModule.h"
 #include "FareModule.h"
 #include "FileModule.h"
@@ -570,6 +571,87 @@ void handleCancellation(int client, const std::string& body,
               << cancelledBooking.pnr << '\n';
 }
 
+// Return the current administrator login state to the browser.
+void handleAdminSession(int client, const AdminModule& adminModule,
+                        int failedLoginAttempts) {
+    const int remainingAttempts =
+        std::max(0, AdminModule::kMaxLoginAttempts - failedLoginAttempts);
+    const std::string body =
+        std::string("{\"success\":true,\"authenticated\":") +
+        (adminModule.isAuthenticated() ? "true" : "false") +
+        ",\"remainingAttempts\":" + std::to_string(remainingAttempts) +
+        ",\"locked\":" + (remainingAttempts == 0 ? "true" : "false") + "}";
+    sendResponse(client, 200, "OK", "application/json", body);
+}
+
+// Verify administrator credentials through the existing AdminModule.
+void handleAdminLogin(int client, const std::string& body,
+                      AdminModule& adminModule, int& failedLoginAttempts) {
+    std::map<std::string, std::string> values;
+    if (!parseJsonObject(body, values)) {
+        sendJsonError(client, 400, "Bad Request",
+                      "Request body must be a valid JSON object.");
+        return;
+    }
+
+    const auto username = values.find("username");
+    const auto password = values.find("password");
+    if (username == values.end() || password == values.end() ||
+        username->second.empty() || password->second.empty()) {
+        sendJsonError(client, 400, "Bad Request",
+                      "Both username and password are required.");
+        return;
+    }
+
+    if (failedLoginAttempts >= AdminModule::kMaxLoginAttempts) {
+        const std::string response =
+            "{\"success\":false,\"authenticated\":false,"
+            "\"remainingAttempts\":0,"
+            "\"message\":\"Maximum login attempts reached. Restart the server to try again.\"}";
+        sendResponse(client, 429, "Too Many Requests", "application/json", response);
+        return;
+    }
+
+    const Status result = adminModule.login(username->second, password->second);
+    if (result == Status::OK) {
+        failedLoginAttempts = 0;
+        const std::string response =
+            "{\"success\":true,\"authenticated\":true,"
+            "\"remainingAttempts\":" +
+            std::to_string(AdminModule::kMaxLoginAttempts) +
+            ",\"message\":\"Administrator login successful.\"}";
+        sendResponse(client, 200, "OK", "application/json", response);
+        std::cout << "Administrator logged in through the web interface.\n";
+        return;
+    }
+
+    ++failedLoginAttempts;
+    const int remainingAttempts =
+        std::max(0, AdminModule::kMaxLoginAttempts - failedLoginAttempts);
+    const std::string message = remainingAttempts == 0
+        ? "Maximum login attempts reached. Restart the server to try again."
+        : "Invalid administrator username or password.";
+    std::ostringstream response;
+    response << "{\"success\":false,\"authenticated\":false,"
+             << "\"remainingAttempts\":" << remainingAttempts << ','
+             << "\"message\":" << jsonString(message) << '}';
+    sendResponse(client, remainingAttempts == 0 ? 429 : 401,
+                 remainingAttempts == 0 ? "Too Many Requests" : "Unauthorized",
+                 "application/json", response.str());
+}
+
+// End the current administrator session.
+void handleAdminLogout(int client, AdminModule& adminModule,
+                       int& failedLoginAttempts) {
+    adminModule.logout();
+    failedLoginAttempts = 0;
+    const std::string body =
+        "{\"success\":true,\"authenticated\":false,"
+        "\"message\":\"Administrator logged out successfully.\"}";
+    sendResponse(client, 200, "OK", "application/json", body);
+    std::cout << "Administrator logged out of the web interface.\n";
+}
+
 bool readWebFile(const std::string& path, std::string& contents,
                  std::string& contentType) {
     std::string filePath;
@@ -595,7 +677,8 @@ bool readWebFile(const std::string& path, std::string& contents,
 }
 
 void handleClient(int client, BookingModule& bookingModule,
-                  TicketModule& tickets, TrainModule& trains) {
+                  TicketModule& tickets, TrainModule& trains,
+                  AdminModule& adminModule, int& failedLoginAttempts) {
     HttpRequest request;
     if (!receiveRequest(client, request)) {
         sendJsonError(client, 400, "Bad Request", "Could not read the HTTP request.");
@@ -604,6 +687,22 @@ void handleClient(int client, BookingModule& bookingModule,
 
     if (request.method == "GET" && request.path == "/api/trains") {
         handleTrains(client, trains);
+        return;
+    }
+
+    if (request.method == "GET" && request.path == "/api/admin/session") {
+        handleAdminSession(client, adminModule, failedLoginAttempts);
+        return;
+    }
+
+    if (request.method == "POST" && request.path == "/api/admin/login") {
+        handleAdminLogin(client, request.body, adminModule,
+                         failedLoginAttempts);
+        return;
+    }
+
+    if (request.method == "POST" && request.path == "/api/admin/logout") {
+        handleAdminLogout(client, adminModule, failedLoginAttempts);
         return;
     }
 
@@ -680,6 +779,8 @@ int main(int argc, char* argv[]) {
     FareModule fares(trains);
     TicketModule tickets(bookings);
     BookingModule bookingModule(trains, bookings, validation, fares, tickets, files);
+    AdminModule adminModule(trains, bookings, files);
+    int failedAdminLoginAttempts = 0;
 
     const int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket < 0) {
@@ -721,7 +822,8 @@ int main(int argc, char* argv[]) {
         const int client = accept(serverSocket,
             reinterpret_cast<sockaddr*>(&clientAddress), &clientLength);
         if (client < 0) continue;
-        handleClient(client, bookingModule, tickets, trains);
+        handleClient(client, bookingModule, tickets, trains,
+                     adminModule, failedAdminLoginAttempts);
         close(client);
     }
 

@@ -28,6 +28,16 @@ const cancellationDetails = document.querySelector("#cancellation-details");
 const confirmCancellationButton = document.querySelector("#confirm-cancellation-button");
 const cancellationResult = document.querySelector("#cancellation-result");
 
+// Administrator login elements
+const adminLoginForm = document.querySelector("#admin-login-form");
+const adminUsernameInput = document.querySelector("#admin-username");
+const adminPasswordInput = document.querySelector("#admin-password");
+const adminLoginButton = document.querySelector("#admin-login-button");
+const adminMessage = document.querySelector("#admin-message");
+const adminSession = document.querySelector("#admin-session");
+const adminSessionMessage = document.querySelector("#admin-session-message");
+const adminLogoutButton = document.querySelector("#admin-logout-button");
+
 function formatFare(amount) {
   return `₹${Number(amount).toLocaleString("en-IN", {
     minimumFractionDigits: 2,
@@ -398,5 +408,129 @@ cancellationPnrInput.addEventListener("input", () => {
   confirmCancellationButton.textContent = "Confirm Cancellation";
 });
 
+
+
+function showAdminSession(authenticated) {
+  adminLoginForm.hidden = authenticated;
+  adminSession.hidden = !authenticated;
+
+  if (authenticated) {
+    adminSessionMessage.textContent =
+      "You are logged in as an administrator.";
+    adminMessage.textContent = "Administrator login successful.";
+  }
+}
+
+function setAdminLoginLock(locked) {
+  adminUsernameInput.disabled = locked;
+  adminPasswordInput.disabled = locked;
+  adminLoginButton.disabled = locked;
+
+  if (locked) {
+    adminMessage.textContent =
+      "Maximum login attempts reached. Restart the booking server to try again.";
+  }
+}
+
+// Check whether an administrator session is already active on the server.
+async function loadAdminSession() {
+  try {
+    const response = await fetch("/api/admin/session", { cache: "no-store" });
+    const data = await readApiResponse(
+      response,
+      "Could not check administrator login status."
+    );
+
+    showAdminSession(Boolean(data.authenticated));
+    setAdminLoginLock(Boolean(data.locked));
+  } catch (error) {
+    adminMessage.textContent = error.message ||
+      "Could not connect to the administrator service.";
+    console.error("Could not load administrator session:", error);
+  }
+}
+
+adminLoginForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  adminMessage.textContent = "";
+
+  const username = adminUsernameInput.value.trim();
+  const password = adminPasswordInput.value;
+  if (!username || !password) {
+    adminMessage.textContent = "Enter both username and password.";
+    return;
+  }
+
+  adminLoginButton.disabled = true;
+  adminLoginButton.textContent = "Signing in...";
+
+  try {
+    const response = await fetch("/api/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      if (Number.isInteger(data.remainingAttempts)) {
+        setAdminLoginLock(data.remainingAttempts === 0);
+        if (data.remainingAttempts > 0) {
+          adminMessage.textContent =
+            `${data.message} ${data.remainingAttempts} attempt(s) remaining.`;
+        }
+      }
+      if (!data.message) {
+        throw new Error("Administrator login failed.");
+      }
+      if (data.remainingAttempts !== 0) {
+        adminMessage.textContent = data.message;
+      }
+      return;
+    }
+
+    adminPasswordInput.value = "";
+    showAdminSession(true);
+    adminLoginForm.reset();
+  } catch (error) {
+    adminMessage.textContent = error.message ||
+      "Could not complete administrator login. Please try again.";
+    console.error("Administrator login failed:", error);
+  } finally {
+    adminLoginButton.textContent = "Login";
+    if (!adminLoginButton.disabled) {
+      adminLoginButton.disabled = false;
+    }
+  }
+});
+
+adminLogoutButton.addEventListener("click", async () => {
+  adminLogoutButton.disabled = true;
+  adminLogoutButton.textContent = "Logging out...";
+
+  try {
+    const response = await fetch("/api/admin/logout", {
+      method: "POST"
+    });
+    const data = await readApiResponse(
+      response,
+      "Could not complete administrator logout."
+    );
+
+    showAdminSession(false);
+    adminLoginForm.reset();
+    setAdminLoginLock(false);
+    adminMessage.textContent = data.message || "You have been logged out.";
+  } catch (error) {
+    adminMessage.textContent = error.message ||
+      "Could not complete administrator logout. Please try again.";
+    console.error("Administrator logout failed:", error);
+  } finally {
+    adminLogoutButton.disabled = false;
+    adminLogoutButton.textContent = "Logout";
+  }
+});
+
 // Load authoritative train and seat data as soon as the page opens.
 loadTrains();
+loadAdminSession();
