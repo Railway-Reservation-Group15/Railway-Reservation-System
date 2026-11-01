@@ -1,3 +1,4 @@
+
 /* Railway Ticket Reservation System - homepage (B16)
    Plain CSS, no external fonts or libraries, so the page works offline. */
 
@@ -588,5 +589,81 @@ main {
 
   .ticket:hover {
     transform: none;
+  }
+}
+
+/* ---------- Passenger booking form (B18) ---------- */
+
+#booking-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+#booking-form label {
+  display: grid;
+  gap: 0.4rem;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+#booking-form input,
+#booking-form select {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #b8c1cf;
+  border-radius: 0.35rem;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 400;
+}
+
+#booking-form input:focus,
+#booking-form select:focus {
+  border-color: var(--navy);
+}
+
+#booking-form button {
+  align-self: end;
+  min-height: 3rem;
+  padding: 0.7rem 1.2rem;
+  border: 0;
+  border-radius: 0.35rem;
+  background: var(--signal-red);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#booking-form button:hover {
+  background: #a90d26;
+}
+
+#booking-message {
+  margin-top: 1rem;
+  color: var(--ink-soft);
+}
+
+#booking-confirmation {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  background: var(--paper);
+  border: 1px solid var(--paper-edge);
+  border-left: 4px solid var(--amber);
+  border-radius: 0.5rem;
+}
+
+#booking-confirmation h3 {
+  margin-top: 0;
+}
+
+@media (max-width: 38rem) {
+  #booking-form {
+    grid-template-columns: 1fr;
   }
 }
