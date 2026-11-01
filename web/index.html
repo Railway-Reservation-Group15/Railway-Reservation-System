@@ -200,7 +200,9 @@
             min="1"
             required
             placeholder="Enter train number"
+            list="booking-train-list"
           >
+          <datalist id="booking-train-list"></datalist>
         </label>
 
         <label for="passenger-name">
@@ -210,7 +212,7 @@
             id="passenger-name"
             name="name"
             type="text"
-            maxlength="100"
+            maxlength="50"
             required
             placeholder="Enter full name"
           >
@@ -252,7 +254,7 @@
             id="passenger-contact"
             name="contact"
             type="tel"
-            pattern="[0-9]{10}"
+            pattern="[6-9][0-9]{9}"
             maxlength="10"
             required
             placeholder="10-digit mobile number"
@@ -292,6 +294,21 @@
         </p>
 
         <p>
+          Age:
+          <strong id="confirmation-age"></strong>
+        </p>
+
+        <p>
+          Gender:
+          <strong id="confirmation-gender"></strong>
+        </p>
+
+        <p>
+          Contact:
+          <strong id="confirmation-contact"></strong>
+        </p>
+
+        <p>
           Seat number:
           <strong id="confirmation-seat"></strong>
         </p>
@@ -299,6 +316,11 @@
         <p>
           Fare:
           <strong id="confirmation-fare"></strong>
+        </p>
+
+        <p>
+          Booking date:
+          <strong id="confirmation-date"></strong>
         </p>
 
         <p>
