@@ -1,6 +1,6 @@
 # Railway Ticket Reservation System
 
-**Software Engineering Mini-Project · Group 15 · PES University**
+**Software Engineering Mini-Project · Group 15**
 
 A railway ticket reservation application written in **C++17**. It runs as a menu-driven console program and also as a local website backed by the same C++ modules. Data is stored in plain text files, so there is nothing to install beyond a C++ compiler.
 
