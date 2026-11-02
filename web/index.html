@@ -9,6 +9,7 @@
     content="Railway Ticket Reservation System, Software Engineering mini-project by Group 15. Search trains, book and cancel tickets, and administrator login."
   >
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="admin.css">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to main content</a>
@@ -394,9 +395,8 @@
     >
       <h2 id="admin-heading">Admin Login</h2>
       <p>
-        Sign in with your administrator credentials to verify an
-        administrator session through the existing C++ AdminModule. Train
-        management operations remain available in the console administrator menu.
+        Sign in to manage train records and view all bookings through the
+        existing C++ AdminModule.
       </p>
 
       <form id="admin-login-form" class="action-form">
@@ -438,6 +438,75 @@
       >
         <h3 id="admin-session-heading">Administrator Access</h3>
         <p id="admin-session-message">You are logged in as an administrator.</p>
+
+        <div id="admin-dashboard" class="admin-dashboard" hidden>
+          <h3>Administrator Dashboard</h3>
+          <p>Manage train records and review passenger bookings.</p>
+
+          <section class="admin-panel" aria-labelledby="admin-train-heading">
+            <h4 id="admin-train-heading">Train Management</h4>
+            <form id="admin-train-form" class="admin-form">
+              <input id="admin-train-original-number" type="hidden" value="">
+              <label for="admin-train-number">Train number</label>
+              <input id="admin-train-number" type="number" min="1" required>
+
+              <label for="admin-train-name">Train name</label>
+              <input id="admin-train-name" type="text" maxlength="80" required>
+
+              <label for="admin-train-source">Source</label>
+              <input id="admin-train-source" type="text" maxlength="80" required>
+
+              <label for="admin-train-destination">Destination</label>
+              <input id="admin-train-destination" type="text" maxlength="80" required>
+
+              <label for="admin-train-departure">Departure time</label>
+              <input id="admin-train-departure" type="text" placeholder="HH:MM" required>
+
+              <label for="admin-train-arrival">Arrival time</label>
+              <input id="admin-train-arrival" type="text" placeholder="HH:MM" required>
+
+              <label for="admin-train-fare">Fare (₹)</label>
+              <input id="admin-train-fare" type="number" min="0" step="0.01" required>
+
+              <label for="admin-train-seats">Total seats</label>
+              <input id="admin-train-seats" type="number" min="1" step="1" required>
+
+              <div class="admin-form-actions">
+                <button id="admin-train-submit" type="submit">Add Train</button>
+                <button id="admin-train-cancel-edit" type="button" hidden>Cancel Edit</button>
+              </div>
+            </form>
+            <p id="admin-train-message" class="form-message" role="status" aria-live="polite"></p>
+
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Train No.</th><th>Name</th><th>Route</th><th>Time</th>
+                    <th>Fare</th><th>Total seats</th><th>Available</th><th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-trains-body"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="admin-panel" aria-labelledby="admin-bookings-heading">
+            <h4 id="admin-bookings-heading">All Bookings</h4>
+            <p id="admin-bookings-message" class="form-message" role="status" aria-live="polite"></p>
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>PNR</th><th>Passenger</th><th>Train</th><th>Seat</th>
+                    <th>Fare</th><th>Booking date</th><th>Status</th><th>Refund</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-bookings-body"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
         <button
           id="admin-logout-button"
           class="action-button"

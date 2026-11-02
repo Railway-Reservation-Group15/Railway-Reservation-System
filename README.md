@@ -146,3 +146,18 @@ g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude tests/test_nfr_performance.cpp 
 g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude tests/test_nfr_seats.cpp src/BookingModule.cpp src/FareModule.cpp src/FileModule.cpp src/TicketModule.cpp src/TrainModule.cpp src/ValidationModule.cpp -o test_nfr_seats && ./test_nfr_seats
 g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude src/*.cpp -o railway && tests/test_nfr_usability.sh ./railway
 ```
+## Web Administrator Management
+
+After logging in, the browser administrator dashboard supports adding trains,
+modifying existing train details, viewing all trains, viewing all bookings,
+and deleting trains that have no confirmed bookings. These operations use
+the existing `AdminModule` and its file-persistence checks. A train number is
+kept fixed when modifying a train, and capacity cannot be reduced below the
+number of confirmed bookings.
+
+The administrator API includes `GET /api/admin/trains`,
+`GET /api/admin/bookings`, `POST /api/admin/trains/add`,
+`POST /api/admin/trains/modify`, and `POST /api/admin/trains/delete`.
+Administrative operations are rejected unless the server-side administrator
+session is authenticated. The local server uses one in-memory admin session
+and is intended for localhost coursework use only.
