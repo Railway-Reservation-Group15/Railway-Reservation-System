@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cctype>
 #include <csignal>
+#include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -652,6 +653,199 @@ void handleAdminLogout(int client, AdminModule& adminModule,
     std::cout << "Administrator logged out of the web interface.\n";
 }
 
+// Convert a booking to the compact row format used by the admin dashboard.
+std::string adminBookingToJson(const Booking& booking) {
+    std::ostringstream output;
+    output << "{"
+           << "\"pnr\":" << jsonString(booking.pnr) << ','
+           << "\"trainNo\":" << booking.trainNo << ','
+           << "\"passengerName\":" << jsonString(booking.passenger.name) << ','
+           << "\"seatNo\":" << booking.seatNo << ','
+           << "\"fare\":" << booking.fare << ','
+           << "\"bookingDate\":" << jsonString(booking.bookingDate) << ','
+           << "\"status\":" << jsonString(booking.status) << ','
+           << "\"refund\":" << booking.refund
+           << '}';
+    return output.str();
+}
+
+bool parseNonNegativeDouble(const std::string& text, double& value) {
+    if (text.empty()) return false;
+    try {
+        std::size_t used = 0;
+        const double parsed = std::stod(text, &used);
+        if (used != text.size() || !std::isfinite(parsed) || parsed < 0.0) {
+            return false;
+        }
+        value = parsed;
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
+
+void sendAdminOperationError(int client, Status result,
+                             const std::string& operation) {
+    switch (result) {
+        case Status::NOT_AUTHENTICATED:
+            sendJsonError(client, 401, "Unauthorized",
+                          "Please log in as an administrator first.");
+            return;
+        case Status::INVALID_INPUT:
+            sendJsonError(client, 400, "Bad Request",
+                          "Please check the train details and try again.");
+            return;
+        case Status::DUPLICATE_TRAIN_NO:
+            sendJsonError(client, 409, "Conflict",
+                          "A train with this number already exists.");
+            return;
+        case Status::TRAIN_NOT_FOUND:
+            sendJsonError(client, 404, "Not Found",
+                          "The requested train was not found.");
+            return;
+        case Status::INVALID_CAPACITY:
+            sendJsonError(client, 409, "Conflict",
+                          "Total seats cannot be lower than confirmed bookings.");
+            return;
+        case Status::TRAIN_HAS_ACTIVE_BOOKINGS:
+            sendJsonError(client, 409, "Conflict",
+                          "This train cannot be deleted while it has confirmed bookings.");
+            return;
+        case Status::FILE_ERROR:
+            sendJsonError(client, 500, "Internal Server Error",
+                          "The change could not be saved to the data file.");
+            return;
+        default:
+            sendJsonError(client, 400, "Bad Request",
+                          operation + " could not be completed.");
+            return;
+    }
+}
+
+void handleAdminTrains(int client, const AdminModule& adminModule) {
+    std::vector<Train> records;
+    const Status result = adminModule.viewTrains(records);
+    if (result != Status::OK) {
+        sendAdminOperationError(client, result, "Loading trains");
+        return;
+    }
+
+    std::ostringstream body;
+    body << "{\"success\":true,\"trains\":[";
+    for (std::size_t i = 0; i < records.size(); ++i) {
+        if (i != 0) body << ',';
+        body << trainToJson(records[i]);
+    }
+    body << "]}";
+    sendResponse(client, 200, "OK", "application/json", body.str());
+}
+
+void handleAdminBookings(int client, const AdminModule& adminModule) {
+    std::vector<Booking> records;
+    const Status result = adminModule.viewBookings(records);
+    if (result != Status::OK) {
+        sendAdminOperationError(client, result, "Loading bookings");
+        return;
+    }
+
+    std::ostringstream body;
+    body << "{\"success\":true,\"bookings\":[";
+    for (std::size_t i = 0; i < records.size(); ++i) {
+        if (i != 0) body << ',';
+        body << adminBookingToJson(records[i]);
+    }
+    body << "]}";
+    sendResponse(client, 200, "OK", "application/json", body.str());
+}
+
+void handleAdminTrainSave(int client, const std::string& body,
+                          AdminModule& adminModule, bool modifying) {
+    std::map<std::string, std::string> values;
+    if (!parseJsonObject(body, values)) {
+        sendJsonError(client, 400, "Bad Request",
+                      "Request body must be a valid JSON object.");
+        return;
+    }
+
+    const auto trainNoField = values.find("trainNo");
+    const auto nameField = values.find("name");
+    const auto sourceField = values.find("source");
+    const auto destinationField = values.find("destination");
+    const auto departureField = values.find("departure");
+    const auto arrivalField = values.find("arrival");
+    const auto fareField = values.find("fare");
+    const auto seatsField = values.find("totalSeats");
+
+    if (trainNoField == values.end() || nameField == values.end() ||
+        sourceField == values.end() || destinationField == values.end() ||
+        departureField == values.end() || arrivalField == values.end() ||
+        fareField == values.end() || seatsField == values.end()) {
+        sendJsonError(client, 400, "Bad Request",
+                      "Required fields: trainNo, name, source, destination, departure, arrival, fare and totalSeats.");
+        return;
+    }
+
+    Train train{};
+    if (!parsePositiveInt(trainNoField->second, train.trainNo) ||
+        !parsePositiveInt(seatsField->second, train.totalSeats) ||
+        !parseNonNegativeDouble(fareField->second, train.fare)) {
+        sendJsonError(client, 400, "Bad Request",
+                      "Train number, fare or seat capacity is invalid.");
+        return;
+    }
+
+    train.name = nameField->second;
+    train.source = sourceField->second;
+    train.destination = destinationField->second;
+    train.departure = departureField->second;
+    train.arrival = arrivalField->second;
+    train.availableSeats = train.totalSeats;
+
+    const Status result = modifying
+        ? adminModule.modifyTrain(train.trainNo, train)
+        : adminModule.addTrain(train);
+    if (result != Status::OK) {
+        sendAdminOperationError(client, result,
+                                modifying ? "Updating train" : "Adding train");
+        return;
+    }
+
+    const std::string message = modifying
+        ? "Train details updated successfully."
+        : "Train added successfully.";
+    sendResponse(client, 200, "OK", "application/json",
+        "{\"success\":true,\"message\":" + jsonString(message) + "}");
+}
+
+void handleAdminTrainDelete(int client, const std::string& body,
+                            AdminModule& adminModule) {
+    std::map<std::string, std::string> values;
+    if (!parseJsonObject(body, values)) {
+        sendJsonError(client, 400, "Bad Request",
+                      "Request body must be a valid JSON object.");
+        return;
+    }
+
+    const auto trainNoField = values.find("trainNo");
+    int trainNo = 0;
+    if (trainNoField == values.end() ||
+        !parsePositiveInt(trainNoField->second, trainNo)) {
+        sendJsonError(client, 400, "Bad Request",
+                      "A valid train number is required.");
+        return;
+    }
+
+    const Status result = adminModule.deleteTrain(trainNo);
+    if (result != Status::OK) {
+        sendAdminOperationError(client, result, "Deleting train");
+        return;
+    }
+
+    sendResponse(client, 200, "OK", "application/json",
+        "{\"success\":true,\"message\":\"Train deleted successfully.\"}");
+}
+
+
 bool readWebFile(const std::string& path, std::string& contents,
                  std::string& contentType) {
     std::string filePath;
@@ -664,6 +858,9 @@ bool readWebFile(const std::string& path, std::string& contents,
     } else if (path == "/app.js") {
         filePath = "web/app.js";
         contentType = "application/javascript";
+    } else if (path == "/admin.css") {
+        filePath = "web/admin.css";
+        contentType = "text/css";
     } else {
         return false;
     }
@@ -703,6 +900,32 @@ void handleClient(int client, BookingModule& bookingModule,
 
     if (request.method == "POST" && request.path == "/api/admin/logout") {
         handleAdminLogout(client, adminModule, failedLoginAttempts);
+        return;
+    }
+
+    // Administrator management endpoints. AdminModule enforces authentication.
+    if (request.method == "GET" && request.path == "/api/admin/trains") {
+        handleAdminTrains(client, adminModule);
+        return;
+    }
+
+    if (request.method == "GET" && request.path == "/api/admin/bookings") {
+        handleAdminBookings(client, adminModule);
+        return;
+    }
+
+    if (request.method == "POST" && request.path == "/api/admin/trains/add") {
+        handleAdminTrainSave(client, request.body, adminModule, false);
+        return;
+    }
+
+    if (request.method == "POST" && request.path == "/api/admin/trains/modify") {
+        handleAdminTrainSave(client, request.body, adminModule, true);
+        return;
+    }
+
+    if (request.method == "POST" && request.path == "/api/admin/trains/delete") {
+        handleAdminTrainDelete(client, request.body, adminModule);
         return;
     }
 

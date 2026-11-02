@@ -38,6 +38,24 @@ const adminSession = document.querySelector("#admin-session");
 const adminSessionMessage = document.querySelector("#admin-session-message");
 const adminLogoutButton = document.querySelector("#admin-logout-button");
 
+const adminDashboard = document.querySelector("#admin-dashboard");
+const adminTrainForm = document.querySelector("#admin-train-form");
+const adminTrainOriginalNumber = document.querySelector("#admin-train-original-number");
+const adminTrainNumberInput = document.querySelector("#admin-train-number");
+const adminTrainNameInput = document.querySelector("#admin-train-name");
+const adminTrainSourceInput = document.querySelector("#admin-train-source");
+const adminTrainDestinationInput = document.querySelector("#admin-train-destination");
+const adminTrainDepartureInput = document.querySelector("#admin-train-departure");
+const adminTrainArrivalInput = document.querySelector("#admin-train-arrival");
+const adminTrainFareInput = document.querySelector("#admin-train-fare");
+const adminTrainSeatsInput = document.querySelector("#admin-train-seats");
+const adminTrainSubmitButton = document.querySelector("#admin-train-submit");
+const adminTrainCancelEditButton = document.querySelector("#admin-train-cancel-edit");
+const adminTrainMessage = document.querySelector("#admin-train-message");
+const adminTrainsBody = document.querySelector("#admin-trains-body");
+const adminBookingsBody = document.querySelector("#admin-bookings-body");
+const adminBookingsMessage = document.querySelector("#admin-bookings-message");
+
 function formatFare(amount) {
   return `₹${Number(amount).toLocaleString("en-IN", {
     minimumFractionDigits: 2,
@@ -410,9 +428,205 @@ cancellationPnrInput.addEventListener("input", () => {
 
 
 
+
+function addTableCell(row, value) {
+  const cell = document.createElement("td");
+  cell.textContent = value === null || value === undefined ? "" : String(value);
+  row.append(cell);
+  return cell;
+}
+
+function resetAdminTrainForm() {
+  adminTrainForm.reset();
+  adminTrainOriginalNumber.value = "";
+  adminTrainNumberInput.readOnly = false;
+  adminTrainSubmitButton.textContent = "Add Train";
+  adminTrainCancelEditButton.hidden = true;
+}
+
+function editAdminTrain(train) {
+  adminTrainOriginalNumber.value = String(train.trainNo);
+  adminTrainNumberInput.value = String(train.trainNo);
+  adminTrainNumberInput.readOnly = true;
+  adminTrainNameInput.value = train.name;
+  adminTrainSourceInput.value = train.source;
+  adminTrainDestinationInput.value = train.destination;
+  adminTrainDepartureInput.value = train.departure;
+  adminTrainArrivalInput.value = train.arrival;
+  adminTrainFareInput.value = String(train.fare);
+  adminTrainSeatsInput.value = String(train.totalSeats);
+  adminTrainSubmitButton.textContent = "Save Changes";
+  adminTrainCancelEditButton.hidden = false;
+  adminTrainMessage.textContent =
+    `Editing train ${train.trainNo}. The train number cannot be changed.`;
+  adminTrainForm.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+async function loadAdminTrains() {
+  const response = await fetch("/api/admin/trains", { cache: "no-store" });
+  const data = await readApiResponse(response, "Could not load trains.");
+  adminTrainsBody.replaceChildren();
+
+  if (!Array.isArray(data.trains) || data.trains.length === 0) {
+    const row = document.createElement("tr");
+    const cell = document.createElement("td");
+    cell.colSpan = 9;
+    cell.textContent = "No trains are currently available.";
+    row.append(cell);
+    adminTrainsBody.append(row);
+    return;
+  }
+
+  data.trains.forEach((train) => {
+    const row = document.createElement("tr");
+    addTableCell(row, train.trainNo);
+    addTableCell(row, train.name);
+    addTableCell(row, `${train.source} to ${train.destination}`);
+    addTableCell(row, `${train.departure} - ${train.arrival}`);
+    addTableCell(row, formatFare(train.fare));
+    addTableCell(row, train.totalSeats);
+    addTableCell(row, train.availableSeats);
+
+    const actions = document.createElement("td");
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.className = "admin-small-button";
+    editButton.textContent = "Edit";
+    editButton.addEventListener("click", () => editAdminTrain(train));
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "admin-small-button admin-delete-button";
+    deleteButton.textContent = "Delete";
+    deleteButton.addEventListener("click", () => deleteAdminTrain(train));
+    actions.append(editButton, deleteButton);
+    row.append(actions);
+    adminTrainsBody.append(row);
+  });
+}
+
+async function loadAdminBookings() {
+  const response = await fetch("/api/admin/bookings", { cache: "no-store" });
+  const data = await readApiResponse(response, "Could not load bookings.");
+  adminBookingsBody.replaceChildren();
+
+  if (!Array.isArray(data.bookings) || data.bookings.length === 0) {
+    const row = document.createElement("tr");
+    const cell = document.createElement("td");
+    cell.colSpan = 8;
+    cell.textContent = "No bookings are currently available.";
+    row.append(cell);
+    adminBookingsBody.append(row);
+    adminBookingsMessage.textContent = "";
+    return;
+  }
+
+  data.bookings.forEach((booking) => {
+    const row = document.createElement("tr");
+    addTableCell(row, booking.pnr);
+    addTableCell(row, booking.passengerName);
+    addTableCell(row, booking.trainNo);
+    addTableCell(row, booking.seatNo);
+    addTableCell(row, formatFare(booking.fare));
+    addTableCell(row, booking.bookingDate);
+    addTableCell(row, booking.status);
+    addTableCell(row, formatFare(booking.refund || 0));
+    adminBookingsBody.append(row);
+  });
+  adminBookingsMessage.textContent = `${data.bookings.length} booking(s) found.`;
+}
+
+async function loadAdminDashboard() {
+  adminTrainMessage.textContent = "Loading train records...";
+  adminBookingsMessage.textContent = "Loading booking records...";
+  try {
+    await Promise.all([loadAdminTrains(), loadAdminBookings()]);
+    adminTrainMessage.textContent = "Train records loaded.";
+  } catch (error) {
+    adminTrainMessage.textContent = error.message ||
+      "Could not load administrator records.";
+    console.error("Could not load admin dashboard:", error);
+  }
+}
+
+async function deleteAdminTrain(train) {
+  const confirmed = window.confirm(
+    `Delete train ${train.trainNo} - ${train.name}? This cannot be undone.`
+  );
+  if (!confirmed) return;
+
+  try {
+    const response = await fetch("/api/admin/trains/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ trainNo: train.trainNo })
+    });
+    const data = await readApiResponse(response, "Could not delete train.");
+    adminTrainMessage.textContent = data.message || "Train deleted successfully.";
+    resetAdminTrainForm();
+    await Promise.all([loadAdminTrains(), loadTrains(false)]);
+  } catch (error) {
+    adminTrainMessage.textContent = error.message || "Could not delete train.";
+  }
+}
+
+adminTrainForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  adminTrainMessage.textContent = "Saving train details...";
+
+  const payload = {
+    trainNo: Number(adminTrainNumberInput.value),
+    name: adminTrainNameInput.value.trim(),
+    source: adminTrainSourceInput.value.trim(),
+    destination: adminTrainDestinationInput.value.trim(),
+    departure: adminTrainDepartureInput.value.trim(),
+    arrival: adminTrainArrivalInput.value.trim(),
+    fare: Number(adminTrainFareInput.value),
+    totalSeats: Number(adminTrainSeatsInput.value)
+  };
+  const modifying = adminTrainOriginalNumber.value !== "";
+  const endpoint = modifying
+    ? "/api/admin/trains/modify"
+    : "/api/admin/trains/add";
+
+  if (!Number.isInteger(payload.trainNo) || payload.trainNo <= 0 ||
+      !Number.isFinite(payload.fare) || payload.fare < 0 ||
+      !Number.isInteger(payload.totalSeats) || payload.totalSeats <= 0) {
+    adminTrainMessage.textContent =
+      "Enter a valid train number, non-negative fare and positive seat capacity.";
+    return;
+  }
+
+  adminTrainSubmitButton.disabled = true;
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const data = await readApiResponse(
+      response,
+      modifying ? "Could not update train." : "Could not add train."
+    );
+    adminTrainMessage.textContent = data.message || "Train saved successfully.";
+    resetAdminTrainForm();
+    await Promise.all([loadAdminTrains(), loadTrains(false)]);
+  } catch (error) {
+    adminTrainMessage.textContent = error.message || "Could not save train details.";
+  } finally {
+    adminTrainSubmitButton.disabled = false;
+  }
+});
+
+adminTrainCancelEditButton.addEventListener("click", () => {
+  resetAdminTrainForm();
+  adminTrainMessage.textContent = "Train editing cancelled.";
+});
+
 function showAdminSession(authenticated) {
   adminLoginForm.hidden = authenticated;
   adminSession.hidden = !authenticated;
+  adminDashboard.hidden = !authenticated;
 
   if (authenticated) {
     adminSessionMessage.textContent =
@@ -443,6 +657,9 @@ async function loadAdminSession() {
 
     showAdminSession(Boolean(data.authenticated));
     setAdminLoginLock(Boolean(data.locked));
+    if (data.authenticated) {
+      await loadAdminDashboard();
+    }
   } catch (error) {
     adminMessage.textContent = error.message ||
       "Could not connect to the administrator service.";
@@ -492,6 +709,7 @@ adminLoginForm.addEventListener("submit", async (event) => {
     adminPasswordInput.value = "";
     showAdminSession(true);
     adminLoginForm.reset();
+    await loadAdminDashboard();
   } catch (error) {
     adminMessage.textContent = error.message ||
       "Could not complete administrator login. Please try again.";
@@ -519,6 +737,9 @@ adminLogoutButton.addEventListener("click", async () => {
 
     showAdminSession(false);
     adminLoginForm.reset();
+    adminTrainsBody.replaceChildren();
+    adminBookingsBody.replaceChildren();
+    resetAdminTrainForm();
     setAdminLoginLock(false);
     adminMessage.textContent = data.message || "You have been logged out.";
   } catch (error) {

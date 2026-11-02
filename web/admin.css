@@ -1,0 +1,90 @@
+/* Administrator dashboard additions */
+.admin-dashboard {
+  margin-top: 1.5rem;
+}
+
+.admin-panel {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #d7dce3;
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+.admin-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.65rem 1rem;
+  align-items: end;
+}
+
+.admin-form label {
+  font-weight: 600;
+}
+
+.admin-form input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 0.65rem;
+  border: 1px solid #aeb7c4;
+  border-radius: 0.4rem;
+  font: inherit;
+}
+
+.admin-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.admin-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 0.75rem;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 0.65rem;
+  border-bottom: 1px solid #e1e5eb;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.admin-table th {
+  background: #f3f5f8;
+}
+
+.admin-small-button {
+  margin: 0.15rem;
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+}
+
+.admin-delete-button {
+  background: #8e2f2f;
+  color: #fff;
+}
+
+#admin-dashboard[hidden],
+#admin-session[hidden] {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .admin-panel {
+    padding: 0.7rem;
+  }
+
+  .admin-table {
+    font-size: 0.82rem;
+  }
+}
