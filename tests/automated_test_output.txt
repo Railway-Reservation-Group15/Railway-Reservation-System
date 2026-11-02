@@ -1,0 +1,58 @@
+=== Build application ===
+=== Validation tests ===
+All ValidationModule tests passed.
+=== Booking tests ===
+All BookingModule, B07, B08, B09 and B10 tests passed.
+=== Admin tests ===
+All AdminModule tests passed.
+=== Admin train-management tests ===
+All B12 administrator train tests passed.
+=== NFR performance tests ===
+TC-NFR-01 search performance, 10000 train records (limit 2000 ms)
+  load 10,000 trains from trains.txt                42.694 ms
+  search by source and destination                   7.483 ms
+  search by source only (case/space insensitive)     4.073 ms
+  search by destination only                         4.048 ms
+  search by train number (last record)               0.210 ms
+  search by train number (no match)                  0.143 ms
+  100 consecutive route searches (total)           720.337 ms
+  book one ticket in a 10,000-train data set         0.405 ms
+All TC-NFR-01 checks passed.
+=== NFR seat-consistency tests ===
+All TC-NFR-02 seat consistency checks passed.
+=== NFR usability tests ===
+TC-NFR-03 usability checks
+PASS: main menu shows: View all trains
+PASS: main menu shows: Search by source and destination
+PASS: main menu shows: Search by train number
+PASS: main menu shows: View train details and seat availability
+PASS: main menu shows: Book a ticket
+PASS: main menu shows: View booking by PNR
+PASS: main menu shows: Cancel booking
+PASS: main menu shows: Administrator login
+PASS: main menu shows: Exit
+PASS: main menu prompts the user for a choice
+PASS: booking asks for the train number
+PASS: booking asks for the passenger name
+PASS: booking asks for the age
+PASS: booking asks for gender with allowed values
+PASS: booking asks for the mobile number
+PASS: booking ends with a clear confirmation
+PASS: confirmation shows a 10-digit PNR
+PASS: confirmation shows the seat number
+PASS: confirmation shows the fare
+PASS: confirmation shows the booking status
+INFO: a basic booking needs 6 inputs (menu choice + 5 fields)
+PASS: booking can be retrieved by the PNR shown
+PASS: retrieved booking shows the passenger
+PASS: search prompt explains blank means any
+PASS: route search lists matching trains
+PASS: non-numeric menu input is explained
+PASS: out-of-range choice lists valid options
+PASS: unknown train gives a helpful message
+PASS: invalid passenger details are reported
+PASS: bad PNR explains the expected format
+PASS: app exits cleanly when input ends mid-booking
+
+All TC-NFR-03 usability checks passed.
+=== All test suites passed ===
