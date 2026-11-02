@@ -56,7 +56,7 @@ The Railway Reservation System follows a three-layer architecture defined in the
 - `include/` — Header files, public interfaces, and shared data types.
 - `src/` — Module implementations and the console application entry point.
 - `server/` — Small HTTP server that exposes the existing C++ booking modules to the web interface.
-- `tests/` — Module-level testing documentation and future tests.
+- - `tests/` — Module-level, acceptance, and non-functional test cases.
 - `.github/workflows/` — Automated build checks.
 
 ## Build
@@ -73,33 +73,45 @@ Run the setup application:
 ./railway
 ```
 
-## Web Booking Interface (B18)
+## Web Interface (B19)
 
-The web interface uses the same C++ booking modules and the same `trains.txt` and
-`bookings.txt` files as the console application. The HTTP server serves the web
-files and exposes these endpoints:
-
-- `GET /api/trains` — returns trains, fares, and current available seats.
-- `POST /api/bookings` — validates passenger details, creates a booking through
-  `BookingModule`, saves it to `bookings.txt`, and returns the generated PNR,
-  allocated seat, fare, and booking status.
-
-Build and start the web server from the project root (the directory containing
-`trains.txt` and `bookings.txt`):
+The browser interface uses the same C++ modules and local `trains.txt` and
+`bookings.txt` files as the console application. Build and start the server
+from the project root:
 
 ```bash
-g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude server/booking_server.cpp src/BookingModule.cpp src/FareModule.cpp src/FileModule.cpp src/TicketModule.cpp src/TrainModule.cpp src/ValidationModule.cpp -o booking_server
+g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude server/booking_server.cpp src/AdminModule.cpp src/BookingModule.cpp src/FareModule.cpp src/FileModule.cpp src/TicketModule.cpp src/TrainModule.cpp src/ValidationModule.cpp -o booking_server
 ./booking_server
 ```
 
-Open **http://127.0.0.1:8080** in your browser. Keep the terminal running while
-using the website. Press `Ctrl+C` to stop the server. If port 8080 is occupied,
-start it on another port, for example `./booking_server 8081`.
+Open **http://127.0.0.1:8080** in a browser. Keep the server terminal running
+while using the website. Press `Ctrl+C` to stop it. The server binds to the
+loopback address and is intended for local coursework use; do not expose this
+simple development server to an untrusted network.
 
-Bookings made through the website are real bookings in the project's local
-`bookings.txt` file. The available-seat count is refreshed from the C++ backend
-after each successful booking. Do not open `web/index.html` directly with
-`file://`; use the local server URL so the browser can reach the API.
+The web API provides:
+
+- `GET /api/trains` — returns trains, fares, and current available seats.
+- `POST /api/bookings` — validates passenger details and creates a booking.
+- `GET /api/bookings/{PNR}` — retrieves a booking for passenger review.
+- `POST /api/bookings/cancel` — cancels a confirmed booking and returns the
+  updated booking details, including the stored refund amount.
+- `POST /api/admin/login` — checks credentials through `AdminModule`.
+- `GET /api/admin/session` — reports the current in-memory administrator login
+  state and remaining login attempts.
+- `POST /api/admin/logout` — ends the administrator session.
+
+The administrator login uses the existing credentials configured in
+`AdminModule`; credentials are checked by the C++ backend and are not stored
+in browser local storage. Three failed login attempts lock the web login until
+the server is restarted. The web page currently provides administrator login,
+session status, and logout; train-management operations continue to be
+available through the console administrator menu.
+
+Bookings and cancellations made through the website update the project's
+local data files. Do not open `web/index.html` directly with `file://`; use the
+local server URL so the browser can reach the API.
+
 
 ## Administrator Access
 
